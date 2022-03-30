@@ -1,0 +1,30 @@
+package com.example.orcaadminservice.service;
+
+
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+
+import com.example.orcaadminservice.dto.UserRoleDTO;
+
+
+
+
+
+@Service
+public interface UserRoleService  {
+	public  UserRoleDTO createUserRole(UserRoleDTO userRoleDTO);
+	public UserRoleDTO updateUserRole(UserRoleDTO userRoleDTO);
+	public void deleteUserRole(Integer id);
+	
+	public List<UserRoleDTO>getUserRoles();
+	UserRoleDTO findByUser(String user);
+	UserRoleDTO findById(Integer id);
+	//List<TaskSetDto> getAllTaskSets();
+	UserRoleDTO getUserRoleSetById(Integer id);
+	UserRoleDTO getUserRoleSetByUser(String user);
+//	public UserRoleDTO findByRoles(Integer id);
+	
+}

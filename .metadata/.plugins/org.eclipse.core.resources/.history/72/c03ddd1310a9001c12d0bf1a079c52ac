@@ -1,0 +1,114 @@
+package com.example.orcaadminservice_controller;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+
+import com.example.orcaadminservice.config.MessageConfiguration;
+import com.example.orcaadminservice.controller.UserRoleController;
+import com.example.orcaadminservice.dto.UserRoleDTO;
+import com.example.orcaadminservice.repository.UserRoleRepository;
+import com.example.orcaadminservice.service.UserRoleService;
+
+@ExtendWith(MockitoExtension.class)
+class UserRoleControllerTest {
+
+	UserRoleController userRoleController;
+
+	@Mock
+	private MessageConfiguration messageConfiguration;
+	@Mock
+	private UserRoleService userRoleService;
+	@Mock
+	private UserRoleRepository userRoleRepository;
+
+	@BeforeEach
+	void setUp() {
+		HashMap<String, String> map = new HashMap<>();  
+		map.put(" MT-205","deleted successfully"); 
+		messageConfiguration.setInfo(map);
+		
+	//set  info for message configuration
+		userRoleController = new UserRoleController(userRoleService, messageConfiguration);
+	}
+
+	@Test
+	void createUserRoleTest() {
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+		userRoleDto.setId(1);
+		userRoleDto.setUser("test4");
+
+		when(userRoleService.createUserRole(userRoleDto)).thenReturn(userRoleDto);
+		ResponseEntity<UserRoleDTO> userRoleDTO1 = userRoleController.createUserRole(userRoleDto);
+		assertThat(userRoleDTO1.getBody().getId());
+
+	}
+
+	@Test
+	void testAll() {
+		ResponseEntity<List<UserRoleDTO>> userRoleDtoList = userRoleController.getUserRole();
+		assertThat(userRoleDtoList.getBody().size() > 0);
+
+	}
+
+	@Test
+	void findByIdTest() {
+
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+
+		userRoleDto.setUser("test2");
+		userRoleDto.setId(1);
+
+		when(userRoleService.findById(1)).thenReturn(userRoleDto);
+		ResponseEntity<UserRoleDTO> tasksDtoList = userRoleController.findById(1);
+
+		assertEquals(1, userRoleDto.getId());
+
+	}
+
+	@Test
+	void findByUserTest() {
+
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+		userRoleDto.setUser("test2");
+		userRoleDto.setId(1);
+
+		when(userRoleService.findByUser("test2")).thenReturn(userRoleDto);
+		ResponseEntity<UserRoleDTO> tasksDtoList = userRoleController.findByUser("test2");
+
+		assertEquals("test2", userRoleDto.getUser());
+
+	}
+
+	@Test
+	void updateTest() {
+		UserRoleDTO userRoleDTO = new UserRoleDTO();
+		userRoleDTO.setId(1);
+		userRoleDTO.setUser("test5");
+		when(userRoleService.updateUserRole(userRoleDTO)).thenReturn(userRoleDTO);
+		ResponseEntity<UserRoleDTO> userRoleDTO1 = userRoleController.updateUserRole(userRoleDTO);
+		assertEquals(1, userRoleDTO1.getBody().getId());
+	}
+
+	@Test
+	void deleteUserRoleTest() {
+		Map<String, String> deleteSuccess = new HashMap<>();
+		deleteSuccess.put("id", "1");
+	
+		ResponseEntity<Map<String, String>> messages = userRoleController.deleteUserRole(1);
+		assertEquals(200, messages.getStatusCodeValue());
+	}
+
+}

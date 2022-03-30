@@ -1,0 +1,11 @@
+package com.example.orcaadminservice.service;
+
+import org.springframework.stereotype.Service;
+
+import antlr.collections.List;
+@Service
+public interface UserRoleService  {
+	public create 
+	public List<UserRoleDTO>
+
+}

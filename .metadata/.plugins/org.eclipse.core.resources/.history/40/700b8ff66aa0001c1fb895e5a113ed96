@@ -1,0 +1,34 @@
+package com.innobiz.orca.appconfig.service;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import com.innobiz.orca.appconfig.dto.VendorGroupDTO;
+
+public class VendorGroupService {
+
+	public VendorGroupDTO create(VendorGroupDTO vendorGroupDTO);
+
+	public List<VendorGroupDTO> findAll();
+
+	public VendorGroupDTO update(@Valid VendorGroupDTO vendorGroupDTO);
+
+	public void delete(Integer id);
+
+	VendorGroupDTO findById(Integer id);
+
+	VendorGroupDTO findByName(String Name);
+
+	VendorGroupDTO findByCode(String Code);
+	 
+	// UOMCategoryDTO findByCategoryId(Integer id);
+	 
+
+
+	
+
+
+}
+
+

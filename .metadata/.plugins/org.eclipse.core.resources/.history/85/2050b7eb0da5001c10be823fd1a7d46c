@@ -1,0 +1,91 @@
+package com.example.orcaadminservice.controller;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.orcaadminservice.config.MessageConfiguration;
+import com.example.orcaadminservice.dto.RoleDTO;
+import com.example.orcaadminservice.dto.UserRoleDTO;
+import com.example.orcaadminservice.service.UserRoleService;
+import com.innobiz.orca.appconfig.dto.CustomerCategoryDTO;
+
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+@RestController
+@RequestMapping
+public class UserRoleController {
+	private final UserRoleService userRoleService;
+	MessageConfiguration messageConfiguration;
+	@Autowired
+	UserRoleController(UserRoleService userRoleService,MessageConfiguration messageConfiguration){
+	
+ this.userRoleService=userRoleService;
+ this.messageConfiguration=messageConfiguration;
+}
+	
+	@PostMapping("/create")
+	public ResponseEntity<UserRoleDTO>createUserRole(@RequestBody UserRoleDTO userRoleDTO ){
+		UserRoleDTO userRoleDto=userRoleService.createUserRole(userRoleDTO) ;
+		return new ResponseEntity<>(userRoleDto,OK);
+		
+	}
+	@PostMapping("/update")
+	public ResponseEntity<UserRoleDTO>updateUserRole(@RequestBody UserRoleDTO userRoleDTO){
+		UserRoleDTO userRoleDto =userRoleService.updateUserRole(userRoleDTO);
+		return new ResponseEntity<>(userRoleDto,OK);
+		
+	}
+	@DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String,String>> deleteRole(@PathVariable(value="id") Integer id) {
+        userRoleService.deleteUserRole(id);
+        Map<String,String> deleteSuccess = new HashMap<>();
+        deleteSuccess.put("id",id.toString());
+        deleteSuccess.put("message",messageConfiguration.getInfo().get("MT-205"));
+        return new ResponseEntity<>(deleteSuccess,OK);
+    }
+	@GetMapping("/all")
+	public ResponseEntity<List<UserRoleDTO>>getUserRole(){
+		return new ResponseEntity<>(userRoleService.getUserRoles(),OK);
+	}
+	@GetMapping(path = "/findById/{id}")
+	public ResponseEntity<UserRoleDTO> findById(@PathVariable(value = "id") Integer id) {
+		UserRoleDTO userRoleDTO = userRoleService.findById(id);
+		return new ResponseEntity<>(userRoleDTO, OK);
+	}
+
+	@GetMapping("/findByUser/{name}")
+	public ResponseEntity<UserRoleDTO> findByUser(@PathVariable String user) {
+		UserRoleDTO customerCategoryDTO = userRoleService.findByUser(user);
+		return new ResponseEntity<>(customerCategoryDTO, OK);
+	}
+	
+}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

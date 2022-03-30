@@ -1,0 +1,5 @@
+package com.example.orcaadminservice.dto;
+
+public class UserRoleDTO {
+
+}

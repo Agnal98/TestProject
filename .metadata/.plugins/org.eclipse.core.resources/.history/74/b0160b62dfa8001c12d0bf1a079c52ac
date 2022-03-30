@@ -1,0 +1,146 @@
+package com.example.orcaadminservice.service.impl;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
+
+import org.modelmapper.MappingException;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.orcaadminservice.config.MessageConfiguration;
+import com.example.orcaadminservice.dto.RoleDTO;
+import com.example.orcaadminservice.dto.UserRoleDTO;
+import com.example.orcaadminservice.entity.Role;
+import com.example.orcaadminservice.entity.UserRole;
+import com.example.orcaadminservice.exception.DataNotFoundException;
+import com.example.orcaadminservice.exception.DuplicateDataException;
+import com.example.orcaadminservice.repository.RoleRepository;
+import com.example.orcaadminservice.repository.UserRoleRepository;
+
+import com.example.orcaadminservice.service.UserRoleService;
+
+
+@Service
+@Transactional
+
+public class UserRoleServiceImpl implements UserRoleService {
+
+	private final UserRoleRepository userRoleRepository;
+	private final RoleRepository roleRepository;
+	private final ModelMapper modelMapper;
+	MessageConfiguration messageConfiguration;
+
+	@Autowired
+	UserRoleServiceImpl(UserRoleRepository userRoleRepository, ModelMapper modelMapper,
+			MessageConfiguration messageConfiguration, RoleRepository roleRepository) {
+		this.userRoleRepository = userRoleRepository;
+		this.modelMapper = modelMapper;
+		this.messageConfiguration = messageConfiguration;
+		this.roleRepository = roleRepository;
+	}
+
+	public UserRoleDTO createUserRole(UserRoleDTO userRoleDto) {
+		if (userRoleDto.getId() != null || isDuplicateTask(userRoleDto)) {
+			throw new DuplicateDataException(messageConfiguration.getError().get("MT-207"));
+		}
+		UserRole userRole = userRoleRepository.save(convertDtoToEntity(userRoleDto));
+		return convertEntityToDto(userRole);
+	}
+
+	public UserRoleDTO updateUserRole(UserRoleDTO userRoleDto) {
+		if (userRoleDto.getId() != null) {
+			if (!isDuplicateTaskForUpdate(userRoleDto)) {
+				Optional<UserRole> userroleOptional = userRoleRepository.findById(userRoleDto.getId());
+				if (userroleOptional.isPresent()) {
+					UserRole userRole = mergeTaskDtoToEntity(userRoleDto, userroleOptional.get());
+					userRoleRepository.save(userRole);
+					return convertEntityToDto(userRole);
+				}
+			}
+			throw new DuplicateDataException(messageConfiguration.getError().get("MT-207"));
+		}
+		throw new DataNotFoundException(userRoleDto.getId(), messageConfiguration.getError().get("MT-602"));
+	}
+
+	public void deleteUserRole(Integer id) {
+		Optional<UserRole> userRoleOptional = userRoleRepository.findById(id);
+		if (userRoleOptional.isPresent()) {
+			userRoleOptional.get().setIsDeleted(true);
+		} else {
+			throw new DataNotFoundException(id, messageConfiguration.getError().get("OI-101"));
+		}
+	}
+
+	public List<UserRoleDTO> getUserRoles() {
+		return userRoleRepository.findAll().stream().map(this::convertEntityToDto).toList();
+
+	}
+
+	public UserRoleDTO findByUser(String user) {
+
+		Optional<UserRole> userRoleOptional = userRoleRepository.findByUser(user);
+		if (userRoleOptional.isPresent()) {
+			return convertEntityToDto(userRoleOptional.get());
+		}
+		throw new DataNotFoundException(user, messageConfiguration.getError().get("OI-101"));
+	}
+
+
+	public UserRoleDTO findById(Integer id) {
+
+		Optional<UserRole> userRoleOptional = userRoleRepository.findById(id);
+		if (userRoleOptional.isPresent()) {
+			return convertEntityToDto(userRoleOptional.get());
+		}
+		throw new DataNotFoundException(id, messageConfiguration.getError().get("OI-101"));
+	}
+//	
+	private UserRole mergeTaskDtoToEntity(UserRoleDTO userRoleDto, UserRole userRole)
+			throws EntityNotFoundException, MappingException {
+		modelMapper.map(userRoleDto, userRole);
+		// iterate roledtos
+		List<Role> roles = new ArrayList<Role>();
+		for (RoleDTO roleDTO : userRoleDto.getRoles()) {
+
+			// list of roles
+
+			// find role
+			roles.add(roleRepository.findById(roleDTO.getId()).get());
+
+		}
+		System.out.println(roles);
+		userRole.setRoles(roles);
+		return userRole;
+	}
+
+	private UserRole convertDtoToEntity(UserRoleDTO userRoleDTo) throws MappingException {
+		return modelMapper.map(userRoleDTo, UserRole.class);
+	}
+
+	private UserRoleDTO convertEntityToDto(UserRole userRole) throws MappingException {
+		return modelMapper.map(userRole, UserRoleDTO.class);
+	}
+
+	private boolean isDuplicateTask(UserRoleDTO userRoleDto) {
+		return userRoleRepository.findByUser(userRoleDto.getUser().trim()).isPresent();
+	}
+
+	private boolean isDuplicateTaskForUpdate(UserRoleDTO userRoleDto) {
+		Optional<UserRole> taskOptional = userRoleRepository.findByUser(userRoleDto.getUser().trim());
+		if (taskOptional.isPresent()) {
+			if (taskOptional.get().getId() == userRoleDto.getId()) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+
+}

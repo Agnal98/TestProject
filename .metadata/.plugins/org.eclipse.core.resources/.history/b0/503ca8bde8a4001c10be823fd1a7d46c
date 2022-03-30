@@ -1,0 +1,5 @@
+package com.example.orcaadminservice.entity;
+
+public class UserRole {
+
+}

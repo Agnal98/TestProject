@@ -1,0 +1,244 @@
+package com.example.orcaadminservice_serviceimpl;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+
+import com.example.orcaadminservice.config.MessageConfiguration;
+import com.example.orcaadminservice.dto.UserRoleDTO;
+import com.example.orcaadminservice.entity.UserRole;
+import com.example.orcaadminservice.exception.DataNotFoundException;
+import com.example.orcaadminservice.exception.DuplicateDataException;
+import com.example.orcaadminservice.repository.UserRoleRepository;
+import com.example.orcaadminservice.service.impl.UserRoleServiceImpl;
+
+
+
+@ExtendWith(MockitoExtension.class)
+
+
+class UserRoleServiceImplTest {
+	@Mock
+	UserRoleRepository userRoleRepository;
+
+	@Mock
+	MessageConfiguration messageConfiguration;
+
+	ModelMapper modelMapper = new ModelMapper();
+
+	@InjectMocks
+	UserRoleServiceImpl userRoleService;
+
+	Map<String, String> mockedMap = mock(HashMap.class);
+
+	@BeforeEach
+	void setUp() {
+		// uomService = new UOMServiceImpl(uomRepository,modelMapper,
+		// messageConfiguration);
+	}
+
+	@Test
+	void createUOMSuccessFullyOnValidData() {
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+		 userRoleDto.setUser("test1");
+	
+		 UserRole userRoleReceivedFromDb = new UserRole();
+		 userRoleReceivedFromDb.setId(1);
+		 userRoleReceivedFromDb.setUser("test1");
+//		 userRolrReceivedFromDb.setUomCode("123");
+//		 userRolrReceivedFromDb.setRoundPrescition(0);
+
+		when(userRoleRepository.save(any(UserRole.class))).thenReturn(userRoleReceivedFromDb);
+
+		 UserRoleDTO userRoleDtoResponse = userRoleService.createUserRole(userRoleDto);
+		assertEquals(1, userRoleDtoResponse.getId());
+	}
+
+	@Test
+	void createUserRoleShouldFailIfProvidedIdInRequest() {
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+		userRoleDto.setId(1);
+		userRoleDto.setUser("test1");
+		
+
+		when(messageConfiguration.getError()).thenReturn((HashMap<String, String>) mockedMap);
+		when(mockedMap.get("UPS-207")).thenReturn("Duplicate value found");
+
+		DuplicateDataException duplicateDataException = Assertions.assertThrows(DuplicateDataException.class,
+				() -> userRoleService.createUserRole(userRoleDto));
+
+		assertEquals("Duplicate value found", duplicateDataException.getMessage());
+	}
+
+	
+
+	@Test
+	void updateUserRoleSuccessFullyOnValidData() {
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+		userRoleDto.setId(1);
+		userRoleDto.setUser("test-new-name");
+//		uomDto.setUomCode("123-new-code");
+//		uomDto.setRoundPrescition(2);
+
+		UserRole userRoleFromDb = new UserRole();
+		userRoleFromDb.setId(1);
+		userRoleFromDb.setUser("test1");
+//		userRoleFromDb.setUomCode("123");
+//		userRoleFromDb.setRoundPrescition(2);
+		when(userRoleRepository.findById(1)).thenReturn(Optional.of(userRoleFromDb));
+		UserRoleDTO updateUOMResponse = userRoleService.updateUserRole(userRoleDto);
+		assertEquals(1, updateUOMResponse.getId());
+		assertEquals("test-new-name", updateUOMResponse.getUser());
+	}
+
+	@Test
+	void updateUserRoleShouldFailIfTaskNotFound() {
+		UserRoleDTO userRoleDto = new UserRoleDTO();
+		userRoleDto.setId(100);
+		userRoleDto.setUser("test-new-name");
+//		userRoleDto.setUomCode("123-new-code");
+//		userRoleDto.setRoundPrescition(2);
+
+		when(messageConfiguration.getError()).thenReturn((HashMap<String, String>) mockedMap);
+		when(mockedMap.get("UPS-602")).thenReturn("File not found");
+
+		when(userRoleRepository.findById(100)).thenReturn(Optional.ofNullable(null));
+
+		DataNotFoundException dataNotFoundException = Assertions.assertThrows(DataNotFoundException.class,
+				() -> userRoleService.updateUserRole(userRoleDto));
+
+		assertEquals(100, dataNotFoundException.getTaskId());
+		assertEquals("File not found", dataNotFoundException.getMessage());
+	}
+
+	@Test
+	void findAllShouldSendAllTasks() {
+		UserRole userRole1 = new UserRole();
+		userRole1.setId(1);
+		userRole1.setUser("test1");
+	
+
+
+		UserRole userRole2 = new UserRole();
+		userRole2.setId(2);
+		userRole2.setUser("test2");
+	
+		
+		List<UserRole> userRole = Arrays.asList( userRole1,  userRole2);
+
+		when(userRoleRepository.findAll()).thenReturn( userRole);
+
+		List<UserRoleDTO> userRoleDTOList = userRoleService.getUserRoles();
+
+		assertEquals(2,  userRoleDTOList.size());
+	}
+
+	@Test
+	void getUserRoleByIdShouldReturnUniqueTask() {
+		UserRole userRole = new UserRole();
+		 userRole .setId(1);
+		 userRole .setUser("test1");
+		 
+		UserRoleDTO expectedUserRoleDto = new UserRoleDTO();
+		expectedUserRoleDto.setId(1);
+		expectedUserRoleDto.setUser("test1");
+		
+		when(userRoleRepository.findById(1)).thenReturn(Optional.of(userRole));
+
+		UserRoleDTO actualUserRoleDto = userRoleService.findById(1);
+
+		assertEquals(expectedUserRoleDto, actualUserRoleDto);
+	}
+
+	@Test
+	void getUOMByIdShouldThrowExceptionIfTaskNotFound() {
+
+		when(messageConfiguration.getError()).thenReturn((HashMap<String, String>) mockedMap);
+		when(mockedMap.get("OI-602")).thenReturn("File not found");
+
+		when(userRoleRepository.findById(100)).thenReturn(Optional.ofNullable(null));
+
+		DataNotFoundException dataNotFoundException = Assertions.assertThrows(DataNotFoundException.class,
+				() -> userRoleService.findById(100));
+
+		assertEquals(100, dataNotFoundException.getTaskId());
+		assertEquals("File not found", dataNotFoundException.getMessage());
+	}
+
+	@Test
+	void getUserRoleByNameShouldSendTask() {
+		UserRole userRole1 = new UserRole();
+		userRole1.setId(1);
+		userRole1.setUser("test1");
+		
+
+		when(userRoleRepository.findByUser("test1")).thenReturn(Optional.of(userRole1));
+		UserRoleDTO userRoleDTO = userRoleService.findByUser("test1");
+		assertNotNull(userRoleDTO );
+		assertEquals("test1", userRoleDTO .getUser());
+	}
+
+	@Test
+	void getUserRoleByUserShouldThrowErrorIfTaskNotFound() {
+
+		when(messageConfiguration.getError()).thenReturn((HashMap<String, String>) mockedMap);
+		when(mockedMap.get("UPS-602")).thenReturn("File not found");
+
+		when(userRoleRepository.findByUser("test1")).thenReturn(Optional.empty());
+		DataNotFoundException dataNotFoundException = Assertions.assertThrows(DataNotFoundException.class,
+				() -> userRoleService.findByUser("test1"));
+
+		assertEquals("File not found", dataNotFoundException.getMessage());
+	}
+
+	@Test
+	void deleteUserRoleShouldDeleteUserRole() {
+		UserRole userRole = new UserRole();
+		userRole.setId(1);
+		userRole.setUser("test1");
+		
+
+		when(userRoleRepository.findById(1)).thenReturn(Optional.of(userRole));
+		doNothing().when(userRoleRepository).delete(userRole);
+		userRoleService.deleteUserRole(1);
+
+		verify(userRoleRepository, times(1)).delete(userRole);
+		verify(userRoleRepository, times(1)).findById(1);
+
+	}
+
+	@Test
+	void deleteUserRoleShouldFailIfTaskNotFound() {
+
+		when(messageConfiguration.getError()).thenReturn((HashMap<String, String>) mockedMap);
+		when(mockedMap.get("UPS-602")).thenReturn("File not found");
+
+		when(userRoleRepository.findById(100)).thenReturn(Optional.ofNullable(null));
+		DataNotFoundException dataNotFoundException = Assertions.assertThrows(DataNotFoundException.class,
+				() -> userRoleService.deleteUserRole(100));
+
+		assertEquals(100, dataNotFoundException.getTaskId());
+		assertEquals("File not found", dataNotFoundException.getMessage());
+
+	}
+}

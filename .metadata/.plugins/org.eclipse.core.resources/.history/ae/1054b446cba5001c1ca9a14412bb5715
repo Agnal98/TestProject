@@ -1,0 +1,35 @@
+package com.example.orcaadminservice.dto;
+
+import java.io.Serializable;import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class RoleDTO implements Serializable{
+	
+	private Integer id;
+	
+	@NotBlank
+	@Pattern(regexp = "([A-Za-z0-9]+_?)*", message = "Only Alphanumeric Characters, underscore and space are allowed.")
+	@Size(min = 3, max = 3, message = "Task code should be 3 characters length.")
+	private String code;
+	
+	@NotBlank
+	@Pattern(regexp = "([A-Za-z0-9]+?_?)*", message="Only Alphanumeric Characters, underscore and space are allowed.")
+	@Size(min = 3, max = 100, message = "Task name should be of minimum 3 and maximum 100 characters length.")
+	private String name;
+	private String description;
+	public  RoleDTO[] getRoles() {
+		
+		return null;
+	}
+
+}

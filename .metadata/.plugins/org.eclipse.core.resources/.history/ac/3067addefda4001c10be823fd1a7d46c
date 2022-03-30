@@ -1,0 +1,5 @@
+package com.example.orcaadminservice.repository;
+
+public class UserRoleRepository {
+
+}

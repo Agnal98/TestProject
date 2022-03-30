@@ -1,0 +1,114 @@
+package com.example.orcaadminservice.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.example.orcaadminservice.dto.RolesDTO;
+import com.example.orcaadminservice.dto.UserDTO;
+import com.example.orcaadminservice.service.DataService;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+
+
+@Transactional
+@Service
+public class DataServiceImpl implements DataService {
+	
+	@Value("${key.job.cpz_integration.client_id}")
+	private String clientId;
+
+	@Value("${key.job.cpz_integration.cpz_auth_url}")
+	private String authUrl;
+	
+	@Value("${key.job.cpz_integration.cpz_user_url}")
+	private String user_url;
+	
+	@Value("${key.job.cpz_integration.cpz_roles_url}")
+	private String roles_url;
+	
+	public JSONObject generateAuthorization() {
+		try {
+			HttpResponse<JsonNode> authResponse = Unirest.post(authUrl)
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.field("username","user")
+					.field("password","password")
+					.field("client_id",clientId)
+					.field("grant_type", "password")
+					.asJson();
+			return authResponse.getBody().getObject();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public List<UserDTO> getUsers() throws Exception {
+	
+		JSONObject token_obj= generateAuthorization();
+		String token=(String) token_obj.get("access_token");
+		
+		HttpResponse<JsonNode> jsonResponse 
+	      = Unirest.get(user_url)
+	      .header("Content-Type", "application/json")
+	      .header("Authorization", "Bearer "+token)
+	      .asJson();
+		
+		JsonNode body=jsonResponse.getBody();
+		JSONArray myObj = jsonResponse.getBody().getArray();
+		
+		List<UserDTO> userDTOs=new ArrayList<>();
+		
+		for(int i=0;i<myObj.length();i++) {
+			JSONObject obj = myObj.getJSONObject(i);
+	        String user = obj.getString("username");
+	        String id=obj.getString("id");
+	        boolean enable=obj.getBoolean("enabled");
+	        UserDTO userDTo=new UserDTO();
+	        userDTo.setUsername(user);
+	        userDTo.setId(id);
+	        userDTo.setEnabled(enable);
+	        userDTOs.add(userDTo);
+			
+		}
+		
+		return userDTOs;
+		
+	}
+	public List<RolesDTO>getRoles() throws Exception{
+		JSONObject token_obj= generateAuthorization();
+		String token=(String) token_obj.get("access_token");
+		
+		HttpResponse<JsonNode> jsonResponse 
+	      = Unirest.get(roles_url)
+	      .header("Content-Type", "application/json")
+	      .header("Authorization", "Bearer "+token)
+	      .asJson();
+		
+		JsonNode body=jsonResponse.getBody();
+		JSONArray myObjarr = jsonResponse.getBody().getArray();
+
+		List<RolesDTO> rolesDTOs=new ArrayList<>();
+		
+		for(int i=0;i<myObjarr.length();i++) {
+			JSONObject obj=myObjarr.getJSONObject(i);
+			String name=obj.getString("name");
+			String id=obj.getString("id");
+			String description=obj.getString("description");
+			RolesDTO roleDto=new RolesDTO();
+			roleDto.setId(id);
+			roleDto.setName(name);
+			roleDto.setDescription(description);
+			rolesDTOs.add(roleDto);
+		}
+		
+		return rolesDTOs;
+	}
+}

@@ -1,0 +1,8 @@
+package com.example.orcaadminservice.service;
+
+import antlr.collections.List;
+
+public interface UserRoleService  {
+	public List<RoleDt>roles
+
+}

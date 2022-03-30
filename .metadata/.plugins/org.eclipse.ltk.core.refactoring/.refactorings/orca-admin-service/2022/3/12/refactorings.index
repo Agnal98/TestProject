@@ -1,0 +1,22 @@
+1647404522364	Rename type 'rolesDTO'
+1647404547684	Rename type 'userDTO'
+1647404570436	Rename type 'userRoleDTO'
+1647404586245	Rename type 'UserRole'
+1647404618413	Rename type 'UserRoleRepository'
+1647404642375	Rename type 'UserRoleService'
+1647404667208	Rename type 'UserRoleServiceImpl'
+1647405650691	Rename type 'RolesDTO'
+1647405684689	Rename type 'UserRoleDTO'
+1647406355589	Rename type 'UserRoleContoller'
+1647581729400	Delete element
+1647582301977	Delete element
+1647582339172	Delete element
+1647582470923	Delete element
+1647582502893	Delete element
+1647582537641	Delete element
+1647582708740	Delete element
+1647582920106	Rename package 'com.example.orcaadminservice.controller'
+1647582946672	Rename package 'com.example.orcaadminservice.service.Impl'
+1647583163552	Rename type 'UserRoleTestImpl'
+1647583194057	Rename type 'UserRoleTest'
+1647583213894	Rename type 'RoleTest'

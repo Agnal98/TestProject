@@ -1,0 +1,18 @@
+package com.example.orcaadminservice.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.example.orcaadminservice.entity.Role;
+import com.example.orcaadminservice.entity.UserRole;
+
+@Repository
+public interface UserRoleRepository extends JpaRepository<UserRole, Integer>{
+	Optional<UserRole> findByid(String name);
+
+	Optional<UserRole> findByUser(String name);
+}
+
+

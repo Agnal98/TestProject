@@ -1,0 +1,27 @@
+
+server:
+ port: 8081
+
+spring:
+ profiles:
+    include: messages
+ datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.1.10:3306/keycloak
+    username: root
+    password: Inn0biz@2021
+ jpa:
+  hibernate:
+    ddl-auto: update
+    hbm2ddl.method: update
+    show_sql: true
+    format_sql: true
+    dialect: org.hibernate.dialect.MySQL5Dialect
+     
+key:
+  job:      
+    cpz_integration:
+      cpz_auth_url: http://localhost:8080/auth/realms/demo/protocol/openid-connect/token
+      client_id: demo-keycloak
+      cpz_user_url: http://localhost:8080/auth/admin/realms/demo/users
+      cpz_roles_url: http://localhost:8080/auth/admin/realms/demo/roles

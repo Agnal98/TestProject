@@ -1,0 +1,65 @@
+package com.example.orcaadminservice.controller;
+
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.orcaadminservice.config.MessageConfiguration;
+import com.example.orcaadminservice.dto.RoleDTO;
+import com.example.orcaadminservice.entity.Role;
+import com.example.orcaadminservice.service.RoleService;
+
+@RestController
+@RequestMapping
+public class RoleContoller {
+	
+	private final RoleService roleService;
+	
+	MessageConfiguration messageConfiguration;
+	
+	@Autowired
+	RoleContoller(RoleService roleService, MessageConfiguration messageConfiguration){
+		this.roleService=roleService;
+		this.messageConfiguration=messageConfiguration;
+	}
+
+	@PostMapping("/create")
+	public ResponseEntity<RoleDTO> createRole(@RequestBody @Valid RoleDTO roleDto){
+		RoleDTO roleDTo=roleService.createRole(roleDto);
+		return new ResponseEntity<>(roleDTo,OK);
+	}
+	
+	@PutMapping("/update")
+	public ResponseEntity<RoleDTO>updateRole(@RequestBody @Valid RoleDTO roleDTo){
+		RoleDTO roleDto=roleService.updateRole(roleDTo);
+		return new ResponseEntity<>(roleDto,OK);
+	}
+	
+	@DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String,String>> deleteRole(@PathVariable(value="id") Integer id) {
+        roleService.deleteRole(id);
+        Map<String,String> deleteSuccess = new HashMap<>();
+        deleteSuccess.put("id",id.toString());
+        deleteSuccess.put("message",messageConfiguration.getInfo().get("MT-205"));
+        return new ResponseEntity<>(deleteSuccess,OK);
+    }
+	@GetMapping("/all")
+	public ResponseEntity<List<RoleDTO>>getRoles(){
+		return new ResponseEntity<>(roleService.getRoles(),OK);
+	}
+}
